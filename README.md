@@ -1,34 +1,68 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Frontegg Next.js
 
-## Getting Started
+![alt text](https://fronteggstuff.blob.core.windows.net/frongegg-logos/logo-transparent.png)
 
-First, run the development server:
+Frontegg is a web platform where SaaS companies can set up their fully managed, scalable and brand aware - SaaS features
+and integrate them into their SaaS portals in up to 5 lines of code.
+
+### @frontegg/nextjs uses AdminPortal and LoginBox.
+
+## Installation
+
+Use the package manager [npm](https://www.npmjs.com/) to install frontegg Next.js library.
 
 ```bash
-npm run dev
-# or
-yarn dev
+npm install @frontegg/nextjs
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Wrap your application in `_app.js` with `Frontegg Provider`:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```js
+import { FronteggProvider } from '@frontegg/nextjs'
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+const contextOptions = {
+  baseUrl: 'https://{HOST}.frontegg.com',// Your backend base URL (frontegg will direct the requests to it)
+}
 
-## Learn More
+export const App = ({ Component, pageProps }) => {
+  return <FronteggProvider contextOptions={contextOptions}>
+    <Component {...pageProps}/>
+  </FronteggProvider>
+}
 
-To learn more about Next.js, take a look at the following resources:
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You can use React Hooks to access Frontegg store.
 
-## Deploy on Vercel
+```js
+import { useAuthUser } from '@frontegg/nextjs'
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+const HomePage = () => {
+  const user = useAuthUser();
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+  return <div>
+    Logged In user: {user.email}
+  </div>
+}
+```
+
+Openning the Admin Portal is available via the following code snippet.
+
+```js
+import { AdminPortal } from '@frontegg/nextjs'
+
+const Toolbar = () => {
+
+  return <nav>
+    {/*... your application tabs ...*/}
+
+    <button onClick={() => AdminPortal.show()}>
+      Open Admin Portal
+    </button>
+  </nav>
+}
+```
