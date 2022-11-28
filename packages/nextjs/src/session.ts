@@ -1,12 +1,12 @@
-import { IncomingMessage } from 'http';
-import { FronteggNextJSSession } from './common/types';
-import { unsealData } from 'iron-session';
-import { jwtVerify } from 'jose';
-import { ParsedUrlQuery } from 'querystring';
-import { GetServerSidePropsContext, GetServerSidePropsResult, PreviewData } from 'next';
-import fronteggConfig from './common/FronteggConfig';
 import { authInitialState } from '@frontegg/redux-store';
+import { IncomingMessage } from 'http';
+import { unsealData } from 'iron-session';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { ParsedUrlQuery } from 'querystring';
 import { parseCookie, uncompress } from './common/cookieHelpers';
+import fronteggConfig from './common/FronteggConfig';
+import { getSessionFromCookie } from './common/sessionHelpers';
+import { FronteggNextJSSession } from './common/types';
 
 type RequestType = IncomingMessage | Request;
 
@@ -28,35 +28,12 @@ export async function getHostedLoginRefreshToken(req: RequestType): Promise<stri
     return undefined;
   }
 }
+
 export async function getSession(req: RequestType): Promise<FronteggNextJSSession | undefined> {
   try {
     const cookieStr = 'credentials' in req ? req.headers.get('cookie') || '' : req.headers.cookie || '';
-
     const sealFromCookies = parseCookie(cookieStr);
-    if (!sealFromCookies) {
-      return undefined;
-    }
-    const compressedJwt: string = await unsealData(sealFromCookies, {
-      password: fronteggConfig.passwordsAsMap,
-    });
-    const uncompressedJwt = await uncompress(compressedJwt);
-    const { accessToken, refreshToken } = JSON.parse(uncompressedJwt);
-
-    if (!accessToken) {
-      return undefined;
-    }
-    const publicKey = await fronteggConfig.getJwtPublicKey();
-    const { payload }: any = await jwtVerify(accessToken, publicKey);
-
-    const session: FronteggNextJSSession = {
-      accessToken,
-      user: payload,
-      refreshToken,
-    };
-    if (session.user.exp * 1000 < Date.now()) {
-      return undefined;
-    }
-    return session;
+    return getSessionFromCookie(sealFromCookies);
   } catch (e) {
     console.error(e);
     return undefined;
@@ -65,8 +42,7 @@ export async function getSession(req: RequestType): Promise<FronteggNextJSSessio
 
 export function withSSRSession<
   P extends { [key: string]: any } = { [key: string]: any },
-  Q extends ParsedUrlQuery = ParsedUrlQuery,
-  D extends PreviewData = PreviewData
+  Q extends ParsedUrlQuery = ParsedUrlQuery
 >(
   handler: (
     context: GetServerSidePropsContext<Q>,

@@ -3,6 +3,7 @@
   "libName": "FronteggNextJs",
   "version": "4.0.19",
   "author": "Frontegg LTD",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

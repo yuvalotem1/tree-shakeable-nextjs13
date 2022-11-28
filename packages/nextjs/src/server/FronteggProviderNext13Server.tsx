@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 import { getServerSideSession } from './getServerSideSession';
-import { FronteggClientProvider } from '../client/FronteggClientProvider';
+import { FronteggClientProvider } from '../client';
 import { FronteggAppOptions } from '@frontegg/types';
 
 type FronteggProviderNext13Props = Omit<FronteggAppOptions, 'contextOptions'>;

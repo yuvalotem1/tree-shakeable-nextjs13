@@ -1,12 +1,12 @@
 {
-  "name": "@fronteg/react",
+  "name": "@frontegg/nextjs",
   "version": "1.0.66",
   "private": true,
   "author": "Frontegg LTD",
+  "license": "MIT",
   "scripts": {
-    "build": "cd packages/nextjs && yarn build",
-    "build-demo": "cd packages/demo-saas && yarn build",
-    "start": "cd packages/nextjs && yarn build && cd ../demo-saas && yarn build && yarn start",
+    "build": "cd packages/nextjs && yarn build:watch",
+    "start": "cd packages/demo-saas && yarn build && yarn dev",
     "prettier-hook": "prettier --config ./.prettierrc.json --write .",
     "prettier-check-hook": "prettier --config ./.prettierrc.json --check .",
     "prepublishOnly": "make move-package-json-to-dist"

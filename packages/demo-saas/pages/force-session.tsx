@@ -3,7 +3,6 @@ import { AdminPortal, useAuthUserOrNull, withSSRSession } from '@frontegg/nextjs
 
 export default function ForceSession({ ssrSession }) {
   const user = useAuthUserOrNull();
-  console.log('user', user);
 
   return (
     <div>
