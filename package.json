@@ -1,0 +1,48 @@
+{
+  "name": "@fronteg/react",
+  "version": "1.0.66",
+  "private": true,
+  "author": "Frontegg LTD",
+  "scripts": {
+    "build": "cd packages/nextjs && yarn build",
+    "build-demo": "cd packages/demo-saas && yarn build",
+    "start": "cd packages/nextjs && yarn build && cd ../demo-saas && yarn build && yarn start",
+    "prettier-hook": "prettier --config ./.prettierrc.json --write .",
+    "prettier-check-hook": "prettier --config ./.prettierrc.json --check .",
+    "prepublishOnly": "make move-package-json-to-dist"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^8.0.1",
+    "@types/history": "^4.7.7",
+    "@types/node": "^13.9.1",
+    "@types/react": "^17.0.1",
+    "@types/react-dom": "^17.0.1",
+    "eslint": "^6.6.0",
+    "eslint-plugin-react": "^7.17.0",
+    "history": "^4.9.0",
+    "lerna": "5.1.8",
+    "path": "^0.12.7",
+    "pre-commit": "^1.2.2",
+    "prettier": "2.1.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "rollup": "^2.15.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "tslib": "^2.3.0",
+    "tslint": "^6.1.0",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1"
+  },
+  "nyc": {
+    "reporter": [
+      "html"
+    ]
+  },
+  "pre-commit": {
+    "run": "prettier-check-hook"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
