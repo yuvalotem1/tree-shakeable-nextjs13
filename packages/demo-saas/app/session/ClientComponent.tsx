@@ -1,7 +1,7 @@
 'use client';
 import { useAuthUserOrNull } from '@frontegg/nextjs';
 
-export const User = () => {
+export const UserSession = () => {
   const user = useAuthUserOrNull();
-  return <div>client user: {JSON.stringify(user)}</div>;
+  return <div>user session client side: {JSON.stringify(user)}</div>;
 };

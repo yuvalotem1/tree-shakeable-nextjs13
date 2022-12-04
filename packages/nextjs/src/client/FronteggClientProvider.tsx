@@ -5,18 +5,14 @@ import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import { useRouter } from 'next/navigation';
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { FronteggProviderProps } from '../FronteggProvider';
-import { createContext } from 'react';
-import type { FronteggApp } from '@frontegg/js';
-
-const AppContext = createContext<FronteggApp | null>(null);
+import AppContext from './AppClientContext';
+import NoSSR from 'react-no-ssr';
 
 type ConnectorProps = FronteggProviderProps & {
   router: AppRouterInstance;
   appName?: string;
 };
-
-const Connector: FC<ConnectorProps> = (_props) => {
-  const { router, appName, hostedLoginBox, customLoginBox, ...props } = _props;
+const Connector: FC<ConnectorProps> = ({ router, appName = 'default', hostedLoginBox, ...props }) => {
   const isSSR = typeof window === 'undefined';
 
   const baseName = props.basename ?? '';
@@ -57,11 +53,10 @@ const Connector: FC<ConnectorProps> = (_props) => {
   );
 
   const app = useMemo(() => {
-    let createdApp;
     try {
-      createdApp = AppHolder.getInstance(appName ?? 'default');
+      return AppHolder.getInstance(appName);
     } catch (e) {
-      createdApp = initialize(
+      return initialize(
         {
           ...props,
           hostedLoginBox: hostedLoginBox ?? false,
@@ -77,16 +72,13 @@ const Connector: FC<ConnectorProps> = (_props) => {
           },
           onRedirectTo,
         },
-        appName ?? 'default'
+        appName
       );
     }
-    return createdApp;
   }, [appName, props, hostedLoginBox, baseName, onRedirectTo, contextOptions]);
   ContextHolder.setOnRedirectTo(onRedirectTo);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     app.store.dispatch({
       type: 'auth/requestAuthorizeSSR',
       payload: props.session ?? { refreshToken: null, accessToken: null },
@@ -118,9 +110,11 @@ export const FronteggClientProvider: FC<FronteggProviderProps> = (props) => {
   const router = useRouter();
 
   return (
-    <Connector {...props} router={router} framework={'nextjs'}>
-      <ExpireInListener />
-      {props.children}
-    </Connector>
+    <NoSSR>
+      <Connector {...props} router={router} framework={'nextjs'}>
+        <ExpireInListener />
+        {props.children}
+      </Connector>
+    </NoSSR>
   );
 };

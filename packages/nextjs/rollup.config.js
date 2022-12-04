@@ -30,8 +30,7 @@ const plugins = [
 ];
 
 const internalFiles = getDirectoryFileNames('./src');
-const isExternal = (filePath) =>
-  !internalFiles.some((fileName) => filePath.includes(fileName) && !filePath.includes('index'));
+const isExternal = (filePath) => !internalFiles.some((fileName) => filePath.includes(fileName));
 
 export default [
   {

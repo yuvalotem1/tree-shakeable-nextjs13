@@ -1,15 +1,13 @@
 import React, { PropsWithChildren } from 'react';
-import { getServerSideSession } from './getServerSideSession';
+import { getSession } from './getSessionNext13';
 import { FronteggClientProvider } from '../client';
 import { FronteggAppOptions } from '@frontegg/types';
 
-type FronteggProviderNext13Props = Omit<FronteggAppOptions, 'contextOptions'>;
-
-export const FronteggProviderNext13Server = async ({
+export const FronteggProvider = async ({
   children,
   ...options
-}: PropsWithChildren<FronteggProviderNext13Props>) => {
-  const session = await getServerSideSession();
+}: PropsWithChildren<Omit<FronteggAppOptions, 'contextOptions'>>) => {
+  const session = await getSession();
   const envAppUrl = process.env['FRONTEGG_APP_URL'];
   const envBaseUrl = process.env['FRONTEGG_BASE_URL'];
   const envClientId = process.env['FRONTEGG_CLIENT_ID'];

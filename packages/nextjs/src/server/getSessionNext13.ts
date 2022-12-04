@@ -7,9 +7,10 @@ import {
 } from '../common';
 import { cookies } from 'next/headers';
 
-export async function getServerSideSession(): Promise<FronteggNextJSSession | undefined> {
+export async function getSession(): Promise<FronteggNextJSSession | undefined> {
   try {
-    const cookie = getCookieFromArray(cookies);
+    const allCookies = cookies().getAll();
+    const cookie = getCookieFromArray(allCookies);
     return getSessionFromCookie(cookie);
   } catch (e) {
     console.error(e);
@@ -18,12 +19,12 @@ export async function getServerSideSession(): Promise<FronteggNextJSSession | un
 }
 
 export async function getUserSession(): Promise<FronteggUserSession | null> {
-  const session = await getServerSideSession();
+  const session = await getSession();
   return session?.user ?? null;
 }
 
 export async function getUserTokens(): Promise<FronteggUserTokens | null> {
-  const session = await getServerSideSession();
+  const session = await getSession();
   if (!session) {
     return null;
   }

@@ -1,2 +1,2 @@
-export * from './getServerSideSession';
-export * from './FronteggProviderNext13Server';
+export * from './getSessionNext13';
+export * from './FronteggProviderNext13';
