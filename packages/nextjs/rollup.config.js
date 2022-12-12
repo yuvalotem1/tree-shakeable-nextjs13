@@ -3,7 +3,6 @@ import ts from 'rollup-plugin-typescript2';
 import path from 'path';
 import clientComponentPlugin from '../../scripts/rollup-plugins/clientComponentPlugin';
 import movePackageJsonPlugin from '../../scripts/rollup-plugins/movePackageJsonPlugin';
-import getDirectoryFileNames from '../../scripts/getDirectoryFileNames';
 
 const distFolder = path.join(__dirname, './dist/');
 
@@ -29,9 +28,6 @@ const plugins = [
   clientComponentPlugin(),
 ];
 
-const internalFiles = getDirectoryFileNames('./src');
-const isExternal = (filePath) => !internalFiles.some((fileName) => filePath.includes(fileName));
-
 export default [
   {
     input: {
@@ -41,7 +37,7 @@ export default [
       'common/index': './src/common/index.ts',
     },
     plugins,
-    external: isExternal,
+    external: (id) => !(path.isAbsolute(id) || id.startsWith('.')),
     output: {
       dir: distFolder,
       sourcemap: true,

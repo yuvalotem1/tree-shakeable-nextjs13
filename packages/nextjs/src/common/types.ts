@@ -1,3 +1,5 @@
+import { ILoginResponse, ITenantsResponse } from '@frontegg/rest-api';
+
 export interface AccountEnvironment {
   id: string;
   createdAt: string;
@@ -13,6 +15,10 @@ export interface FronteggUserTokens {
   refreshToken?: string;
 }
 
+export interface MeAndTenants {
+  user?: ILoginResponse;
+  tenants?: ITenantsResponse[];
+}
 export interface FronteggUserSession {
   sub: string;
   name: string;

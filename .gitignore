@@ -50,3 +50,6 @@ cypress/screenshots
 # yarn
 .yarnrc
 .yarn
+
+#vscode
+.vscode
