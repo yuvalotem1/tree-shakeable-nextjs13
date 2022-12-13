@@ -3,6 +3,7 @@
   "version": "6.7.6",
   "author": "Frontegg LTD",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "cd packages/nextjs && yarn build:watch",
     "start": "cd packages/demo-saas && yarn dev",

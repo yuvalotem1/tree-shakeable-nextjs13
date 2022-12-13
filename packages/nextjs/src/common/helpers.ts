@@ -73,7 +73,7 @@ export function createCookie({
 function createSplitCookie(cookieName: string, session: string, options: CookieSerializeOptions, cookieLength: number) {
   const numberOfCookies = Math.ceil(cookieLength / COOKIE_MAX_LENGTH);
   const splitSession = chunkString(session, numberOfCookies);
-  const allCookies = [];
+  const allCookies: string[] = [];
   for (let i = 1; i <= numberOfCookies; i++) {
     allCookies.push(cookie.serialize(`${cookieName}-${i}`, splitSession[i - 1], options));
   }
@@ -82,7 +82,7 @@ function createSplitCookie(cookieName: string, session: string, options: CookieS
 
 function chunkString(str: string, numChunks: number) {
   const chunkSize = Math.ceil(str.length / numChunks);
-  const chunks = [];
+  const chunks: string[] = [];
   for (let i = 0; i < numChunks; i + chunkSize) {
     const limit = i + chunkSize;
     chunks.push(str.substring(i, limit < str.length ? limit : str.length));
