@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "cd packages/nextjs && yarn build:watch",
-    "start": "cd packages/demo-saas && yarn build && yarn dev",
+    "start": "cd packages/demo-saas && yarn dev",
+    "build-demo-saas": "cd packages/demo-saas && yarn build",
     "prettier-hook": "prettier --config ./.prettierrc.json --write .",
     "prettier-check-hook": "prettier --config ./.prettierrc.json --check .",
     "prepublishOnly": "make move-package-json-to-dist"

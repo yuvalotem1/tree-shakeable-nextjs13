@@ -26,9 +26,6 @@ export function Index() {
       <br />
       <br />
       <Link href='/force-session'>check force session</Link>
-      <br />
-      <br />
-      <Link href='/new'>app directory</Link>
     </div>
   );
 }

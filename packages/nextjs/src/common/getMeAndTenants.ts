@@ -1,10 +1,10 @@
-import { getTenants, getUsers } from '../api';
-import { MeAndTenants } from './types';
+import { getTenants, getUsers } from './api';
+import { MeAndTenantsResponse } from './types';
 
-export async function meAndTenants(
-  reqHeaders?: Record<string, string | null>,
+export async function getMeAndTenants(
+  reqHeaders?: Record<string, string | string[] | null | undefined>,
   accessToken?: string
-): Promise<MeAndTenants> {
+): Promise<MeAndTenantsResponse> {
   if (!reqHeaders || !accessToken) {
     return {};
   }

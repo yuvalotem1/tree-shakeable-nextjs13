@@ -2,15 +2,21 @@ import {
   FronteggNextJSSession,
   FronteggUserSession,
   FronteggUserTokens,
-  getCookieFromArray,
+  parseCookieFromArray,
   getSessionFromCookie,
+  getTokensFromCookie,
 } from '../common';
 import { cookies } from 'next/headers';
 
+const getCookie = () => {
+  const allCookies = cookies().getAll();
+  const cookie = parseCookieFromArray(allCookies);
+  return cookie;
+};
+
 export async function getSession(): Promise<FronteggNextJSSession | undefined> {
   try {
-    const allCookies = cookies().getAll();
-    const cookie = getCookieFromArray(allCookies);
+    const cookie = getCookie();
     return getSessionFromCookie(cookie);
   } catch (e) {
     console.error(e);
@@ -18,17 +24,17 @@ export async function getSession(): Promise<FronteggNextJSSession | undefined> {
   }
 }
 
-export async function getUserSession(): Promise<FronteggUserSession | null> {
+export async function getUserSession(): Promise<FronteggUserSession | undefined> {
   const session = await getSession();
-  return session?.user ?? null;
+  return session?.user;
 }
 
-export async function getUserTokens(): Promise<FronteggUserTokens | null> {
-  const session = await getSession();
-  if (!session) {
-    return null;
+export async function getUserTokens(): Promise<FronteggUserTokens | undefined> {
+  try {
+    const cookie = getCookie();
+    return getTokensFromCookie(cookie);
+  } catch (e) {
+    console.error(e);
+    return undefined;
   }
-  return mapSessionToTokens(session);
 }
-
-const mapSessionToTokens = ({ accessToken, refreshToken }: FronteggUserTokens) => ({ accessToken, refreshToken });

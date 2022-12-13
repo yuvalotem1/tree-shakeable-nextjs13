@@ -1,7 +1,7 @@
 import { FronteggConfig as fronteggConfig } from '../common';
 import { authInitialState } from '@frontegg/redux-store';
 import { useContext, useEffect } from 'react';
-import AppContext from './AppClientContext';
+import AppContext from './AppContext';
 import { useRouter, notFound } from 'next/navigation';
 import { useLoginActions, useLoginWithRedirect } from '@frontegg/react-hooks';
 import { ParsedUrlQuery } from 'querystring';
@@ -11,7 +11,7 @@ type FronteggRouterProps = {
   searchParams: ParsedUrlQuery;
 };
 
-export function FronteggRouter({ params: { 'frontegg-router': pathArr = [] }, searchParams }: FronteggRouterProps) {
+export function FronteggAppRouter({ params: { 'frontegg-router': pathArr = [] }, searchParams }: FronteggRouterProps) {
   const routesObj = {
     ...authInitialState.routes,
     ...fronteggConfig.authRoutes,

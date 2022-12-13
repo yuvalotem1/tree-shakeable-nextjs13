@@ -3,40 +3,45 @@ import { NextApiRequest, NextPageContext } from 'next/dist/shared/lib/utils';
 import {
   createCookie,
   createSessionFromAccessToken,
+  getCookieFromRequest,
+  getTokensFromCookie,
   removeCookies,
   rewriteCookieProperty,
-} from './common/cookieHelpers';
+} from './common';
 import fronteggConfig from './common/FronteggConfig';
 import { FronteggNextJSSession } from './common/types';
-import { getHostedLoginRefreshToken, getSession } from './session';
+import { getSession } from './session';
 
 async function refreshTokenHostedLogin(
   ctx: NextPageContext,
   headers: Record<string, string>
 ): Promise<Response | null> {
-  const refreshToken = await getHostedLoginRefreshToken(ctx.req!);
-
-  if (!refreshToken) {
+  try {
+    const sealFromCookies = getCookieFromRequest(ctx?.req);
+    const tokens = await getTokensFromCookie(sealFromCookies);
+    if (!tokens?.refreshToken) {
+      return null;
+    }
+    return await fetch(`${process.env['FRONTEGG_BASE_URL']}/frontegg${fronteggSilentRefreshTokenUrl}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        grant_type: 'refresh_token',
+        refresh_token: tokens.refreshToken,
+      }),
+      headers: {
+        'accept-encoding': headers['accept-encoding'],
+        'accept-language': headers['accept-language'],
+        cookie: headers['cookie'],
+        accept: headers['accept'],
+        'user-agent': headers['user-agent'],
+        connection: headers['connection'],
+        'cache-control': headers['cache-control'],
+      },
+    });
+  } catch (e) {
     return null;
   }
-
-  return await fetch(`${process.env['FRONTEGG_BASE_URL']}/frontegg${fronteggSilentRefreshTokenUrl}`, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    }),
-    headers: {
-      'accept-encoding': headers['accept-encoding'],
-      'accept-language': headers['accept-language'],
-      cookie: headers['cookie'],
-      accept: headers['accept'],
-      'user-agent': headers['user-agent'],
-      connection: headers['connection'],
-      'cache-control': headers['cache-control'],
-    },
-  });
 }
 
 async function refreshTokenEmbedded(

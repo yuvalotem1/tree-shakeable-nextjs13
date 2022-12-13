@@ -1,11 +1,10 @@
-import React from 'react';
-import type { AppContext, AppProps, AppInitialProps } from 'next/app';
-import type { AppContextType, AppPropsType, NextComponentType } from 'next/dist/shared/lib/utils';
-import { FronteggNextJSSession } from './common/types';
-import { refreshToken } from './refreshToken';
-import { FronteggProvider } from './FronteggProvider';
 import { FronteggAppOptions } from '@frontegg/types';
-import fronteggConfig from './common/FronteggConfig';
+import type { AppContext, AppInitialProps, AppProps } from 'next/app';
+import type { AppContextType, AppPropsType, NextComponentType } from 'next/dist/shared/lib/utils';
+import React from 'react';
+import { FronteggConfig, fronteggErrors, FronteggNextJSSession, getMeAndTenants, MeAndTenantsResponse } from './common';
+import { FronteggProvider } from './FronteggProvider';
+import { refreshToken } from './refreshToken';
 
 type FronteggCustomApp = NextComponentType<
   AppContextType & { session: FronteggNextJSSession | null },
@@ -23,28 +22,35 @@ export const withFronteggApp = (
   const originalGetInitialProps: FronteggCustomApp['getInitialProps'] | undefined = app.getInitialProps;
 
   app.getInitialProps = async (
-    appContext: AppContext & { session: FronteggNextJSSession | null }
+    appContext: AppContext & {
+      session: FronteggNextJSSession | null;
+    } & MeAndTenantsResponse
   ): Promise<AppInitialProps> => {
     const { ctx, Component } = appContext;
-
-    if (ctx.req?.url?.indexOf('/_next/data/') === -1) {
+    if (ctx.req) {
       const session = await refreshToken(ctx);
+      console.log({ session });
+      const { user, tenants } = await getMeAndTenants(ctx.req?.headers, session?.accessToken);
       appContext.session = session;
-      const envAppUrl = fronteggConfig.getEnvAppUrl();
+      appContext.user = user;
+      appContext.tenants = tenants;
+      const { envAppUrl, envBaseUrl, envClientId } = FronteggConfig.appEnvConfig;
       if (!envAppUrl) {
-        throw Error('@frontegg/nextjs: .env.local must contain FRONTEGG_APP_URL');
+        throw Error(fronteggErrors.envAppUrl);
       }
-      if (!process.env['FRONTEGG_BASE_URL']) {
-        throw Error('@frontegg/nextjs: .env.local must contain FRONTEGG_BASE_URL');
+      if (!envBaseUrl) {
+        throw Error(fronteggErrors.envBaseUrl);
       }
-      if (!process.env['FRONTEGG_CLIENT_ID']) {
-        throw Error('@frontegg/nextjs: .env.local must contain FRONTEGG_CLIENT_ID');
+      if (!envClientId) {
+        throw Error(fronteggErrors.envClientId);
       }
       return {
         pageProps: {
           ...(originalGetInitialProps ? await originalGetInitialProps(appContext) : {}),
           ...(Component.getInitialProps ? await Component.getInitialProps(ctx) : {}),
           session,
+          user,
+          tenants,
           envAppUrl,
           envBaseUrl: process.env['FRONTEGG_BASE_URL'],
           envClientId: process.env['FRONTEGG_CLIENT_ID'],
@@ -61,19 +67,14 @@ export const withFronteggApp = (
     }
   };
 
-  fronteggConfig.authRoutes = options?.authOptions?.routes ?? {};
-  fronteggConfig.fronteggAppOptions = options ?? {};
+  FronteggConfig.authRoutes = options?.authOptions?.routes ?? {};
+  FronteggConfig.fronteggAppOptions = options ?? {};
 
   function CustomFronteggApp(appProps: AppProps) {
+    const { user, tenants, session, envAppUrl, envBaseUrl, envClientId } = appProps.pageProps;
     return (
-      <FronteggProvider
-        {...options}
-        session={appProps.pageProps.session}
-        envAppUrl={appProps.pageProps.envAppUrl}
-        envBaseUrl={appProps.pageProps.envBaseUrl}
-        envClientId={appProps.pageProps.envClientId}
-      >
-        {app(appProps)}
+      <FronteggProvider {...options} {...{ user, tenants, session, envAppUrl, envBaseUrl, envClientId }}>
+        {app(appProps) as any}
       </FronteggProvider>
     );
   }

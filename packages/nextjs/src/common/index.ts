@@ -1,5 +1,5 @@
 export { default as FronteggConfig } from './FronteggConfig';
 export * from './types';
-export * from './sessionHelpers';
-export * from './cookieHelpers';
-export * from './meAndTenants';
+export * from './getMeAndTenants';
+export * from './helpers';
+export * from './consts';

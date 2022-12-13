@@ -1,16 +1,14 @@
-import React, { FC, ReactNode, useCallback, useEffect, useMemo } from 'react';
-import { initialize, AppHolder } from '@frontegg/js';
-import { FronteggAppOptions } from '@frontegg/types';
-import { FronteggStoreProvider, useAuthActions, useAuthUserOrNull } from '@frontegg/react-hooks';
+import { AppHolder, initialize } from '@frontegg/js';
+import { FronteggStoreProvider } from '@frontegg/react-hooks';
 import { ContextHolder, RedirectOptions } from '@frontegg/rest-api';
+import { FronteggAppOptions } from '@frontegg/types';
 import { NextRouter, useRouter } from 'next/router';
-import AppContext from './AppContext';
+import React, { FC, PropsWithChildren, useCallback, useEffect, useMemo } from 'react';
+import { AppContext, ExpireInListener } from './client';
 
-export type FronteggProviderNoSSRProps = FronteggAppOptions & {
-  children?: ReactNode;
-};
+export type FronteggProviderNoSSRProps = PropsWithChildren<FronteggAppOptions>;
 
-type ConnectorProps = FronteggProviderNoSSRProps & {
+type ConnectorProps = PropsWithChildren<FronteggAppOptions> & {
   router: NextRouter;
   appName?: string;
 };
@@ -75,20 +73,6 @@ const Connector: FC<ConnectorProps> = (_props) => {
   );
 };
 
-const ExpireInListener = () => {
-  const user = useAuthUserOrNull();
-  const actions = useAuthActions();
-  useEffect(() => {
-    if (user && user?.expiresIn == null) {
-      actions.setUser({
-        ...user,
-        expiresIn: Math.floor(((user as any)['exp'] * 1000 - Date.now()) / 1000),
-      });
-    }
-  }, [actions, user]);
-  // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <></>;
-};
 const FronteggNextJSProvider: FC<FronteggProviderNoSSRProps> = (props) => {
   const router = useRouter();
 

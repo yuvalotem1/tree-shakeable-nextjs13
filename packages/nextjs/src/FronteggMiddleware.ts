@@ -7,7 +7,7 @@ import {
   createSessionFromAccessToken,
   modifySetCookieIfUnsecure,
   removeCookies,
-} from './common/cookieHelpers';
+} from './common';
 import { fronteggAuthApiRoutes } from '@frontegg/rest-api';
 
 /**

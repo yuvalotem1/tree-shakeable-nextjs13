@@ -1,4 +1,11 @@
+import { FronteggAppOptions } from '@frontegg/types';
 import { ILoginResponse, ITenantsResponse } from '@frontegg/rest-api';
+import { IncomingMessage } from 'http';
+import { ReactNode } from 'react';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+import { NextRouter } from 'next/router';
+
+export type RequestType = IncomingMessage | Request;
 
 export interface AccountEnvironment {
   id: string;
@@ -15,7 +22,7 @@ export interface FronteggUserTokens {
   refreshToken?: string;
 }
 
-export interface MeAndTenants {
+export interface MeAndTenantsResponse {
   user?: ILoginResponse;
   tenants?: ITenantsResponse[];
 }
@@ -39,9 +46,27 @@ export interface FronteggUserSession {
 }
 
 export interface FronteggNextJSSession extends FronteggUserTokens {
-  accessToken: string;
-  refreshToken?: string;
   user: FronteggUserSession;
+}
+
+export interface AppEnvConfig {
+  envAppUrl?: string;
+  envBaseUrl?: string;
+  envClientId?: string;
+}
+
+export interface FronteggProviderOptions extends Omit<FronteggAppOptions, 'contextOptions'> {
+  session?: FronteggNextJSSession;
+  envAppUrl: string;
+  envBaseUrl: string;
+  envClientId: string;
+  contextOptions?: Omit<FronteggAppOptions['contextOptions'], 'baseUrl'>;
+}
+
+export interface FronteggProviderProps extends FronteggProviderOptions, MeAndTenantsResponse {
+  children?: ReactNode;
+  router: AppRouterInstance | NextRouter;
+  appName?: string;
 }
 
 declare module 'iron-session' {

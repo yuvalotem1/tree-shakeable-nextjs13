@@ -5,6 +5,9 @@ import { decodeJwt } from 'jose';
 import { RequestCookie } from 'next/dist/server/web/spec-extension/cookies';
 import * as zlib from 'zlib';
 import fronteggConfig from './FronteggConfig';
+import { unsealData } from 'iron-session';
+import { jwtVerify } from 'jose';
+import { FronteggNextJSSession, FronteggUserTokens, RequestType } from './types';
 
 export function rewriteCookieProperty(header: string | string[], config: any, property: string): string | string[] {
   if (Array.isArray(header)) {
@@ -101,6 +104,19 @@ export function parseCookie(cookieStr: string) {
   return sealFromCookies !== '' ? sealFromCookies : undefined;
 }
 
+export function parseCookieFromArray(cookies: RequestCookie[]): string | undefined {
+  const userCookie = cookies.find((c) => c.name === fronteggConfig.cookieName);
+  if (userCookie) {
+    return userCookie.value;
+  }
+  const cookieChunks = cookies.filter((c) => c.name.includes(fronteggConfig.cookieName));
+  if (!cookieChunks) {
+    return undefined;
+  }
+  cookieChunks.sort((a, b) => (parseInt(a.name) > parseInt(b.name) ? 1 : -1));
+  return cookieChunks.map((c) => c.value).join();
+}
+
 export function addToCookies(newCookies: string[], res: ServerResponse) {
   let existingSetCookie = (res.getHeader('set-cookie') as string[] | string) ?? [];
   if (typeof existingSetCookie === 'string') {
@@ -181,15 +197,42 @@ export const modifySetCookieIfUnsecure = (
   return setCookieValue;
 };
 
-export function getCookieFromArray(cookies: RequestCookie[]): string | undefined {
-  const userCookie = cookies.find((c) => c.name === fronteggConfig.cookieName);
-  if (userCookie) {
-    return userCookie.value;
-  }
-  const cookieChunks = cookies.filter((c) => c.name.includes(fronteggConfig.cookieName));
-  if (!cookieChunks) {
+export function getCookieFromRequest(req?: RequestType): string | undefined {
+  if (!req) {
     return undefined;
   }
-  cookieChunks.sort((a, b) => (parseInt(a.name) > parseInt(b.name) ? 1 : -1));
-  return cookieChunks.map((c) => c.value).join();
+  const cookieStr = 'credentials' in req ? req.headers.get('cookie') || '' : req.headers.cookie || '';
+  return parseCookie(cookieStr);
+}
+
+export async function getTokensFromCookie(cookie?: string): Promise<FronteggUserTokens | undefined> {
+  if (!cookie) {
+    return undefined;
+  }
+  const compressedJwt: string = await unsealData(cookie, {
+    password: fronteggConfig.passwordsAsMap,
+  });
+  const uncompressedJwt = await uncompress(compressedJwt);
+  return JSON.parse(uncompressedJwt);
+}
+
+export async function getSessionFromCookie(cookie?: string): Promise<FronteggNextJSSession | undefined> {
+  const tokens = await getTokensFromCookie(cookie);
+
+  if (!tokens?.accessToken) {
+    return undefined;
+  }
+  const { accessToken, refreshToken } = tokens;
+  const publicKey = await fronteggConfig.getJwtPublicKey();
+  const { payload }: any = await jwtVerify(accessToken, publicKey);
+
+  const session: FronteggNextJSSession = {
+    accessToken,
+    user: payload,
+    refreshToken,
+  };
+  if (session.user.exp * 1000 < Date.now()) {
+    return undefined;
+  }
+  return session;
 }
