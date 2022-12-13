@@ -1,7 +1,6 @@
 {
   "name": "@frontegg/nextjs",
-  "version": "1.0.66",
-  "private": true,
+  "version": "6.7.6",
   "author": "Frontegg LTD",
   "license": "MIT",
   "scripts": {
