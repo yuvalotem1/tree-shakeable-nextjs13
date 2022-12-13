@@ -18,7 +18,7 @@ export const UserState = () => {
           loginWithRedirect();
         }}
       >
-        log out Hosted login
+        Hosted login
       </button>
     </div>
   );
